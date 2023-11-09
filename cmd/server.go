@@ -7,10 +7,11 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
 )
 
-// serveCmd represents the serve command
+// serverCmd represents the serve command
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "A brief description of your command",
@@ -22,6 +23,9 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		e := echo.New()
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowHeaders: []string{echo.HeaderOrigin},
+		}))
 		e.GET("/", func(c echo.Context) error {
 			return c.String(http.StatusOK, "Hello, World!")
 		})
