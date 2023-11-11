@@ -20,3 +20,10 @@ aws-app-proxy
 
 # Go workspace file
 go.work
+
+aws-app-proxy
+/.idea/.gitignore
+/.idea/aws-proxy-app.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml

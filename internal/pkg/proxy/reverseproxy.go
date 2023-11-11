@@ -1,5 +1,16 @@
 package proxy
 
 type ReverseProxy struct {
-	config string
+}
+
+func NewReverseProxy() *ReverseProxy {
+	return &ReverseProxy{}
+}
+
+func (r *ReverseProxy) ServeHttpWithPort() {
+
+}
+
+func (r *ReverseProxy) findHandler() {
+
 }

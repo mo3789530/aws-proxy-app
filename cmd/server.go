@@ -1,11 +1,7 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
-	"net/http"
-
+	"aws-proxy-app/internal/pkg/server"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/cobra"
@@ -26,9 +22,20 @@ to quickly create a Cobra application.`,
 		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowHeaders: []string{echo.HeaderOrigin},
 		}))
-		e.GET("/", func(c echo.Context) error {
-			return c.String(http.StatusOK, "Hello, World!")
-		})
+		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: "method=${method}, uri=${uri}, status=${status}, error=${error}\n",
+			Skipper: func(c echo.Context) bool {
+				if c.Request().URL.Path == "/" {
+					return true
+				}
+				return false
+			},
+		}))
+		e.Use(middleware.Recover())
+		//cnf := proxy.NewConfig(os.Getenv("CONFIG_PATH"))
+		server.SetupRootRoutes(e)
+		server.SetupProxyRoutes(e)
+
 		e.Logger.Fatal(e.Start(":8080"))
 	},
 }

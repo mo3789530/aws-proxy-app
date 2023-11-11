@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-local-aws}"
+    image: localstack/localstack:latest
+    platform: linux/x86_64
+    ports:
+      - 4566:4566
+      - 9000:8080
+    volumes:
+      - ./docker/localstack:/docker-entrypoint-initaws.d
+      - /var/run/docker.sock:/var/run/docker.sock
+      # データのマウント
+      - 'localstack-data:/tmp/localstack'
+    environment:
+      # s3のpresignedUrlを利用するためにはtestにしなければいけない
+      # https://docs.localstack.cloud/integrations/aws-cli/#setting-up-local-region-and-credentials-to-run-localstack
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - DATA_DIR=/tmp/localstack/data
+      - DISABLE_CORS_CHECKS=1
+
+volumes:
+  localstack-data:
+    driver: 'local'

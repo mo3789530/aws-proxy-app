@@ -8,6 +8,7 @@ require (
 	github.com/aws/smithy-go v1.16.0
 	github.com/labstack/echo/v4 v4.11.2
 	github.com/spf13/cobra v1.7.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
