@@ -2,11 +2,23 @@ package proxy
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"log/slog"
 	"os"
-
-	"gopkg.in/yaml.v3"
 )
+
+type Root struct {
+	Keys []Key `yaml:"keys"`
+}
+
+type Key struct {
+	SID SID `yaml:"sid"`
+}
+
+type SID struct {
+	Name   string `yaml:"name"`
+	Config Config `yaml:"config"`
+}
 
 type Config struct {
 	Host    Host    `yaml:"host"`
@@ -15,8 +27,12 @@ type Config struct {
 
 type Host struct {
 	Domain string `yaml:"domain"`
-	HTTP   []Port `yaml:"http"`
-	HTTPS  []Port `yaml:"https"`
+	HTTP   []HTTP `yaml:"http"`
+}
+
+type HTTP struct {
+	ListenPort int `yaml:"listen_port"`
+	TargetPort int `yaml:"target_port"`
 }
 
 type Storage struct {
@@ -28,41 +44,14 @@ type Bucket struct {
 	BucketName string `yaml:"bucket_name"`
 }
 
-type Port struct {
-	ListenPort int `yaml:"listen_port"`
-	TargetPort int `yaml:"target_port"`
-}
-
-type Parameter struct {
-	Name   string `yaml:"name"`
-	Config Config `yaml:"config"`
-}
-
-type Parameters *[]Parameter
-
-func NewConfig(path string) []*Parameter {
-	parameters := make([]*Parameter, 0)
-	parameter := &Parameter{
-		Name: "test",
-		Config: Config{
-			Host: Host{
-				Domain: "localhost",
-				HTTP:   []Port{},
-				HTTPS:  []Port{},
-			},
-			Storage: Storage{
-				StorageMode: false,
-				Bucket:      Bucket{},
-			},
-		},
-	}
-	parameters = append(parameters, parameter)
+func NewConfig(path string) Root {
+	var root Root
 	data, err := os.ReadFile(path)
 	if err != nil {
 		slog.Error(fmt.Sprintf("cannot read %v", path))
 	}
-	if err := yaml.Unmarshal(data, parameters); err != nil {
+	if err := yaml.Unmarshal(data, &root); err != nil {
 		slog.Error(fmt.Sprintf("cannot unmarshal %v", err))
 	}
-	return parameters
+	return root
 }

@@ -1,10 +1,13 @@
 package proxy
 
 type ReverseProxy struct {
+	Config Config
 }
 
-func NewReverseProxy() *ReverseProxy {
-	return &ReverseProxy{}
+func NewReverseProxy(config Config) *ReverseProxy {
+	return &ReverseProxy{
+		Config: config,
+	}
 }
 
 func (r *ReverseProxy) ServeHttpWithPort() {

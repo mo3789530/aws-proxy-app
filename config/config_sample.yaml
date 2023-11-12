@@ -1,0 +1,25 @@
+keys:
+  - sid:
+      name: "test"
+      config:
+        host:
+          domain: "localhost"
+          http:
+            - listen_port: 8080
+            - target_port: 8080
+        storage:
+          storage_mode: true
+          bucket:
+            bucket_name: "test"
+  - sid:
+      name: "test2"
+      config:
+        host:
+          domain: "localhost"
+          http:
+            - listen_port: 8080
+            - target_port: 8080
+        storage:
+          storage_mode: true
+          bucket:
+            bucket_name: "test"
