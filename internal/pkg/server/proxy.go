@@ -1,12 +1,14 @@
 package server
 
 import (
+	"aws-proxy-app/internal/pkg/proxy"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 func SetupProxyRoutes(e *echo.Echo) {
+	config := proxy.NewConfig("./config/config_sample.yaml")
 	e.Any("/*", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{})
+		rproxy := proxy.NewReverseProxy(config)
+		return rproxy.Handler(c)
 	})
 }
