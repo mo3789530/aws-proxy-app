@@ -11,13 +11,21 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
+
+	client "aws-proxy-app/internal/pkg/client"
 )
 
-type BucketClient struct {
+type bucketClient struct {
 	S3Client *s3.Client
 }
 
-func (c BucketClient) ListBuckets() ([]types.Bucket, error) {
+func NewS3BucketClient(client *s3.Client) client.StorageClient {
+	return &bucketClient{
+		S3Client: client,
+	}
+}
+
+func (c *bucketClient) ListBuckets() ([]string, error) {
 
 	result, err := c.S3Client.ListBuckets(context.TODO(), &s3.ListBucketsInput{})
 	var buckets []types.Bucket
@@ -26,11 +34,15 @@ func (c BucketClient) ListBuckets() ([]types.Bucket, error) {
 	} else {
 		buckets = result.Buckets
 	}
-	return buckets, err
+	var bucketNames []string
+	for _, v := range buckets {
+		bucketNames = append(bucketNames, *v.Name)
+	}
+	return bucketNames, err
 }
 
 // BucketExists checks whether a bucket exists in the current account.
-func (c BucketClient) BucketExists(bucketName string) (bool, error) {
+func (c *bucketClient) BucketExists(bucketName string) (bool, error) {
 	_, err := c.S3Client.HeadBucket(context.TODO(), &s3.HeadBucketInput{
 		Bucket: aws.String(bucketName),
 	})
@@ -55,7 +67,7 @@ func (c BucketClient) BucketExists(bucketName string) (bool, error) {
 	return exists, err
 }
 
-func (c BucketClient) GetObject(bucketName string, objectKey string, fileName string) ([]byte, error) {
+func (c *bucketClient) GetObject(bucketName string, objectKey string) ([]byte, error) {
 	result, err := c.S3Client.GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),

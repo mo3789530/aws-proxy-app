@@ -22,4 +22,4 @@ keys:
         storage:
           storage_mode: true
           bucket:
-            bucket_name: "test"
+            bucket_name: "test2"

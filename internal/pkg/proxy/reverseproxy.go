@@ -2,32 +2,53 @@ package proxy
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"log/slog"
 	"net/http"
+
+	client "aws-proxy-app/internal/pkg/client"
+
+	"github.com/labstack/echo/v4"
 )
 
 type ReverseProxy struct {
-	Config Root
+	Config  Root
+	Storage client.StorageClient
 }
 
-func NewReverseProxy(config Root) *ReverseProxy {
+func NewReverseProxy(config Root, storage client.StorageClient) *ReverseProxy {
 	return &ReverseProxy{
-		Config: config,
+		Config:  config,
+		Storage: storage,
 	}
 }
 
 // ServeHttpWithPort TODO
 // Proxy mode
-func (r *ReverseProxy) ServeHttpWithPort() {
-
+func (r *ReverseProxy) ServeHttpWithPort() error {
+	return fmt.Errorf("NotImplementedError")
 }
 
 // S3 mode
-func (r *ReverseProxy) mockServerWithS3(c echo.Context, bucket Bucket) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"bucket": bucket.BucketName,
-	})
+func (r *ReverseProxy) mockServerWithS3(c echo.Context, bucket Bucket, sid string) error {
+	// TODO
+	// method := c.Request().Method
+	// fmt.Println(method)
+	url := c.Request().URL
+	fmt.Println(url)
+	fmt.Println(url.RawPath)
+	bucketList, _ := r.Storage.ListBuckets()
+	for _, v := range bucketList {
+		fmt.Println(v)
+	}
+
+	r.Storage.GetObject(bucket.BucketName, getS3Path(sid, url.String()))
+
+	return c.JSON(http.StatusAccepted, map[string]string{})
+
+}
+
+func getS3Path(sid string, url string) string {
+	return fmt.Sprintf("%v/%v", sid, url)
 }
 
 func (r *ReverseProxy) findConfig(sid string) *SID {
@@ -49,8 +70,8 @@ func (r *ReverseProxy) Handler(c echo.Context) error {
 			"error": "config not found",
 		})
 	}
-	if cnf.Config.Storage.StorageMode == true {
-		return r.mockServerWithS3(c, cnf.Config.Storage.Bucket)
+	if cnf.Config.Storage.StorageMode {
+		return r.mockServerWithS3(c, cnf.Config.Storage.Bucket, sid)
 	}
 	return c.JSON(http.StatusOK, map[string]string{
 		"health": "ok",
